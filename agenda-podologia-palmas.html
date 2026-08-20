@@ -10,7 +10,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
 
 <style>
@@ -294,6 +294,7 @@ body{font-family:'Inter',sans-serif;background:#F0F4F3;color:var(--t);min-height
         <span class="live-badge"><span class="live-dot"></span>En vivo</span>
         <button class="btn-icon" onclick="abrirBusqueda()">🔍</button>
         <button class="btn-icon" onclick="abrirConfig()">⚙️</button>
+        <button class="btn-icon" onclick="activarNotificaciones()">🔔</button>
       </div>
     </div>
   </div>
@@ -484,6 +485,35 @@ function iniciarApp(config) {
     toast('❌ Configuración incorrecta. Revisa los datos.');
     console.error(e);
   }
+
+  async function activarNotificaciones() {
+  try {
+    if (!("Notification" in window)) {
+      console.log("Este navegador no soporta notificaciones.");
+      return false;
+    }
+    const permiso = await Notification.requestPermission();
+    if (permiso !== "granted") {
+      console.log("Permiso de notificaciones no concedido.");
+      return false;
+    }
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({
+      vapidKey: "BGGovfEd6ifLpm0l5_MwTzo4no36d1FkgTas1fhIWlpGssh-7-t1wzGEd3w6tUjU9ZeclB33qfZ7X3wGJUwh7V4",
+    });
+    if (!token) {
+      console.log("No se pudo obtener el token FCM.");
+      return false;
+    }
+    await db.ref("fcmTokens/" + token).set({ creado: Date.now() });
+    console.log("Notificaciones activadas correctamente.");
+    toast("🔔 Recordatorios activados");
+    return true;
+  } catch (error) {
+    console.error("Error al activar notificaciones:", error);
+    return false;
+  }
+}
 }
 
 // ===== UTILS =====
