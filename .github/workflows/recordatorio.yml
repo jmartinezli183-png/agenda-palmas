@@ -1,0 +1,26 @@
+name: Recordatorio de Agenda
+
+on:
+  schedule:
+    - cron: "0 13-17 * * *¨
+  workflow_dispatch: {}
+
+jobs:
+  recordatorio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias
+        run: npm install firebase-admin
+
+      - name: Ejecutar recordatorio
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node recordatorio.js
